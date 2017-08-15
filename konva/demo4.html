@@ -58,10 +58,10 @@
         data: [560, 590, 630, 450, 780, 850, 890]
     }, {
         color: 'green',
-        data: [30, 80, 150, 200, 500, 700, 900, 1000]
+        data: [30, 80, 150, 200, 500, 700, 900]
     }, {
         color: 'purple',
-        data: [300, 400, 500, 600, 700, 800, 900, 1000]
+        data: [300, 400, 500, 600, 700, 800, 900]
     }];
 
     var height = window.innerHeight;
@@ -125,8 +125,8 @@
 
     //x轴
     XLineData.forEach(function(item, index) {
-        var XLineInterval = XLineMaxWidth / XLineData.length * (index + 1);
-        console.log(XLineInterval)
+        var XLineInterval = XLineMaxWidth / (XLineData.length - 1) * (index);
+        // console.log(XLineInterval)
         var YLine = new Konva.Line({
 
             points: [XLineInterval, 0, XLineInterval, -YLineMaxHeight],
@@ -158,7 +158,10 @@
         y: y0
     });
 
-
+    var innerCircleGroup = new Konva.Group({
+        x: x0,
+        y: y0
+    });
     // var array = new Array();
     // innerLineYData.forEach(function(item, index) {
     //     var y = parseInt(item / (YLineData.length * 100) * YLineMaxHeight);
@@ -179,21 +182,18 @@
     //     opacity: .5
     // });
     innerLineYData.forEach(function(value, key) {
-        var flag = true;
         var array = new Array();
         value.data.forEach(function(item, index) {
             var y = (item / (YLineData.length * 100) * YLineMaxHeight);
-            var x = (XLineMaxWidth / value.data.length * (index + 1));
+            var x = XLineMaxWidth / (value.data.length - 1) * index;
+            array.push(x, -y);
 
-            if (flag) {
-                array.push(0, -y);
-
-                flag = false;
-            } else {
-                array.push(x, -y);
-            }
+            innerLineCircle({
+                x: x,
+                y: -y,
+                color: XLineData[index].color
+            });
         });
-
         innerLine({
             data: array,
             color: value.color
@@ -207,11 +207,31 @@
             strokeWidth: 3,
             option: 5
         }));
+
+        // for (var i = 0; i < option.data.length / 2; i++) {
+        //     innerLineCircle({
+        //         x: option.data[j],
+        //         y: -option.data[j + 1],
+        //         color: XLineData[i].color
+        //     });
+
+
+        // };
     };
 
 
-    // innerGroup.add();
+
+    function innerLineCircle(option) {
+        innerCircleGroup.add(new Konva.Circle({
+            x: option.x,
+            y: option.y,
+            radius: 5,
+            fill: option.color
+        }))
+    };
+
     innerLayer.add(innerGroup);
+    innerLayer.add(innerCircleGroup);
 
 
 
