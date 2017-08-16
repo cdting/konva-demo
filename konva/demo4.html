@@ -52,7 +52,7 @@
         data: [230, 120, 450, 550, 760, 888, 920]
     }, {
         color: 'pink',
-        data: [920, 888, 760, 550, 450, 120, 230]
+        data: [700, 888, 760, 550, 450, 120, 230]
     }, {
         color: 'blue',
         data: [560, 590, 630, 450, 780, 850, 890]
@@ -110,7 +110,8 @@
         var XLine = new Konva.Line({
             points: [0, -YLineInterval, XLineMaxWidth, -YLineInterval],
             strokeWidth: 1,
-            stroke: '#ddd'
+            stroke: '#ddd',
+            opacity: .5
 
         });
         XYLineGroup.add(XLine);
@@ -162,6 +163,103 @@
         x: x0,
         y: y0
     });
+
+    innerLineYData.forEach(function(value, key) {
+        var array = new Array();
+        value.data.forEach(function(item, index) {
+            var y = (item / (YLineData.length * 100) * YLineMaxHeight);
+            var x = XLineMaxWidth / (value.data.length - 1) * index;
+            array.push(x, -y);
+
+            innerLineCircle({
+                x: x,
+                y: -y,
+                color: XLineData[index].color,
+                name: item + ""
+            });
+        });
+        innerLine({
+            data: array,
+            color: value.color
+        });
+    });
+
+    function innerLine(option) {
+        innerGroup.add(new Konva.Line({
+            points: option.data,
+            stroke: option.color,
+            strokeWidth: 1,
+            option: 5
+        }));
+    };
+
+    function innerLineCircle(option) {
+        innerCircleGroup.add(new Konva.Circle({
+            x: option.x,
+            y: option.y,
+            radius: 3,
+            fill: option.color,
+            name: option.name
+        }))
+    };
+
+
+    var tooltip = new Konva.Label({
+        opacity: 0.75,
+        visible: false,
+        listening: true
+    });
+    tooltip.add(new Konva.Tag({
+        fill: 'black',
+        pointerDirection: 'down',
+        pointerWidth: 10,
+        pointerHeight: 10,
+        lineJoin: 'round',
+        shadowColor: 'black',
+        shadowBlur: 10,
+        shadowOffset: 10,
+        shadowOpacity: 0.2
+    }));
+    tooltip.add(new Konva.Text({
+        text: '',
+        fontFamily: 'Calibri',
+        fontSize: 18,
+        padding: 5,
+        fill: 'white'
+    }));
+    innerCircleGroup.add(tooltip);
+
+
+    innerLayer.add(innerGroup);
+    innerLayer.add(innerCircleGroup);
+    stage.draw();
+
+    innerLayer.on('mouseover mousemove dragmove', function(e) {
+        var node = e.target;
+
+        // console.log(e.target);
+        console.log(e.target.parent.children);
+        var mousePos = node.getStage().getPointerPosition();
+
+        tooltip.position({
+            x: mousePos.x - XLineMaxWidth / (XLineData.length - 1),
+            y: mousePos.y - 7 / 8 * stage.height()
+        });
+        tooltip.getText().setText("状态：" + node.getName());
+        // console.log(node);
+        tooltip.show();
+        innerLayer.batchDraw();
+    });
+
+    innerLayer.on('mouseout', function() {
+        tooltip.hide();
+        innerLayer.draw();
+    });
+
+
+
+
+
     // var array = new Array();
     // innerLineYData.forEach(function(item, index) {
     //     var y = parseInt(item / (YLineData.length * 100) * YLineMaxHeight);
@@ -181,64 +279,4 @@
     //     strokeWidth: 1,
     //     opacity: .5
     // });
-    innerLineYData.forEach(function(value, key) {
-        var array = new Array();
-        value.data.forEach(function(item, index) {
-            var y = (item / (YLineData.length * 100) * YLineMaxHeight);
-            var x = XLineMaxWidth / (value.data.length - 1) * index;
-            array.push(x, -y);
-
-            innerLineCircle({
-                x: x,
-                y: -y,
-                color: XLineData[index].color
-            });
-        });
-        innerLine({
-            data: array,
-            color: value.color
-        });
-    });
-
-    function innerLine(option) {
-        innerGroup.add(new Konva.Line({
-            points: option.data,
-            stroke: option.color,
-            strokeWidth: 3,
-            option: 5
-        }));
-
-        // for (var i = 0; i < option.data.length / 2; i++) {
-        //     innerLineCircle({
-        //         x: option.data[j],
-        //         y: -option.data[j + 1],
-        //         color: XLineData[i].color
-        //     });
-
-
-        // };
-    };
-
-
-
-    function innerLineCircle(option) {
-        innerCircleGroup.add(new Konva.Circle({
-            x: option.x,
-            y: option.y,
-            radius: 5,
-            fill: option.color
-        }))
-    };
-
-    innerLayer.add(innerGroup);
-    innerLayer.add(innerCircleGroup);
-
-
-
-
-
-
-
-
-    stage.draw();
 </script>
